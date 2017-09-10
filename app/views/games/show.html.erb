@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Season:</strong>
+  <%= @game.season %>
+</p>
+
+<p>
+  <strong>Week:</strong>
+  <%= @game.week %>
+</p>
+
+<p>
+  <strong>Type:</strong>
+  <%= @game.type %>
+</p>
+
+<p>
+  <strong>Away:</strong>
+  <%= @game.away %>
+</p>
+
+<%= link_to 'Edit', edit_game_path(@game) %> |
+<%= link_to 'Back', games_path %>
