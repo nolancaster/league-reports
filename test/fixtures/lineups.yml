@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  score: 1.5
+  result: 1
+  team_name: MyString
+  team: one
+  owner: one
+
+two:
+  score: 1.5
+  result: 1
+  team_name: MyString
+  team: two
+  owner: two

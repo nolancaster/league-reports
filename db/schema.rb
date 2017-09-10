@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170910054247) do
+ActiveRecord::Schema.define(version: 20170910054508) do
 
   create_table "leagues", force: :cascade do |t|
     t.string "name"
@@ -18,6 +18,18 @@ ActiveRecord::Schema.define(version: 20170910054247) do
     t.integer "founded"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "lineups", force: :cascade do |t|
+    t.float "score"
+    t.integer "result"
+    t.string "team_name"
+    t.integer "team_id"
+    t.integer "owner_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_id"], name: "index_lineups_on_owner_id"
+    t.index ["team_id"], name: "index_lineups_on_team_id"
   end
 
   create_table "owners", force: :cascade do |t|
