@@ -12,12 +12,15 @@
 
 ActiveRecord::Schema.define(version: 20170910055513) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "games", force: :cascade do |t|
     t.integer "season"
     t.integer "week"
     t.integer "type"
-    t.integer "away_id"
-    t.integer "home_id"
+    t.bigint "away_id"
+    t.bigint "home_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["away_id"], name: "index_games_on_away_id"
@@ -36,8 +39,8 @@ ActiveRecord::Schema.define(version: 20170910055513) do
     t.float "score"
     t.integer "result"
     t.string "team_name"
-    t.integer "team_id"
-    t.integer "owner_id"
+    t.bigint "team_id"
+    t.bigint "owner_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["owner_id"], name: "index_lineups_on_owner_id"
@@ -47,7 +50,7 @@ ActiveRecord::Schema.define(version: 20170910055513) do
   create_table "owners", force: :cascade do |t|
     t.string "first_name"
     t.string "last_name"
-    t.integer "league_id"
+    t.bigint "league_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["league_id"], name: "index_owners_on_league_id"
@@ -55,12 +58,17 @@ ActiveRecord::Schema.define(version: 20170910055513) do
 
   create_table "teams", force: :cascade do |t|
     t.string "name"
-    t.integer "league_id"
-    t.integer "owner_id"
+    t.bigint "league_id"
+    t.bigint "owner_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["league_id"], name: "index_teams_on_league_id"
     t.index ["owner_id"], name: "index_teams_on_owner_id"
   end
 
+  add_foreign_key "lineups", "owners"
+  add_foreign_key "lineups", "teams"
+  add_foreign_key "owners", "leagues"
+  add_foreign_key "teams", "leagues"
+  add_foreign_key "teams", "owners"
 end
