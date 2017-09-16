@@ -1,12 +1,18 @@
 class Scraper
-  def call
-    url = 'http://games.espn.com/ffl/'
-    league_id = 306883
+  @@url = 'http://games.espn.com/ffl/'
+  @@league_office = 'leagueoffice?leagueId='
 
+  def call(league_id)
     agent = Mechanize.new
-    page = agent.get("#{url}clubhouse?leagueId=#{league_id}")
+    page = agent.get("#{@@url}#{@@league_office}#{league_id}")
+    league_name = page.at('#lo-league-header h1').text
+    founded = page.search('#seasonHistoryMenu option').last['value'].to_i
+
+    league = League.create(league_id: league_id, name: league_name, founded: founded)
+
     scoreboard = page.links.find { |l| l.text == 'Scoreboard' }
     page = scoreboard.click
+    scoreboard_url = page.uri.to_s.remove(page.uri.query)
 
     while page
       season_id = /seasonId: (\d+)/.match(page.content)[1].to_i
@@ -18,11 +24,11 @@ class Scraper
         scoring_period_id = 17
         season_id -= 1
 
-        break if season_id < 2016
+        break if season_id < founded
       end
 
-      page = agent.get(
-        "#{url}scoreboard?leagueId=#{league_id}&seasonId=#{season_id}&matchupPeriodId=#{scoring_period_id}")
+      page = agent.get(scoreboard_url + URI.encode_www_form(
+        leagueId: league_id, seasonId: season_id, matchupPeriodId: scoring_period_id))
     end
   end
 
