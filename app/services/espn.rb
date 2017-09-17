@@ -22,7 +22,6 @@ module ESPN
 
     def weeks
       (office.founded..office.current_season).each do |season|
-        puts season
         weeks_for(season)
       end
       @weeks
@@ -33,7 +32,6 @@ module ESPN
       max_week = current_season?(season) ? office.current_week : 17
 
       (1..max_week).each do |week|
-        puts week
         week_of(season, week)
       end
       @weeks[season]
