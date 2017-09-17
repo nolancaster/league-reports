@@ -50,6 +50,7 @@ module ESPN
         matchup = Matchup.new
         Matchup.members.each do |side|
           lineup = Lineup.new
+          lineup.team = matchup_scraper.team_id(side)
           lineup.team_name = matchup_scraper.team_name(side)
           lineup.score = matchup_scraper.score(side)
           matchup.send("#{side}=", lineup)
@@ -157,6 +158,12 @@ module ESPN
     class Matchup < Partial
       @@sides = [:away, :home]
 
+      def team_id(side)
+        id = /teamscrg_(\d+)_activeteamrow/
+          .match(team_row(side)['id'])[1].to_i
+        translate_team_id(id)
+      end
+
       def team_name(side)
         team_row(side).at('.name a').text
       end
@@ -178,14 +185,16 @@ module ESPN
       def team_row(side)
         @page.search('tr')[index(side)]
       end
+
+      private
+
+      def translate_team_id(found)
+        mapping = {
+          8 => 13
+        }
+
+        mapping[found] || found
+      end
     end
   end
-
-  # def team_id(found)
-  #   mapping = {
-  #     8 => 13
-  #   }
-
-  #   mapping[found] || found
-  # end
 end
