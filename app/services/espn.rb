@@ -50,7 +50,7 @@ module ESPN
 
       scraper.each_matchup do |matchup_scraper|
         matchup = Matchup.new
-        [:away, :home].each do |side|
+        Matchup.members.each do |side|
           lineup = Lineup.new
           lineup.team_name = matchup_scraper.team_name(side)
           lineup.score = matchup_scraper.score(side)
