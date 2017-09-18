@@ -1,23 +1,42 @@
 module ESPN
   class League
     Office  = Struct.new(:name, :founded, :current_season, :current_week)
-    Team    = Struct.new(:id, :name)
+    Team    = Struct.new(:id, :name, :owner)
     Matchup = Struct.new(:away, :home)
-    Lineup  = Struct.new(:team, :team_name, :score, :result)
+    Lineup  = Struct.new(:team_id, :team_name, :owner, :score, :result)
 
-    attr_reader :id, :owners
+    attr_reader :id
 
     def initialize(id)
       @id = id
       @weeks = Hash.new { |h, k| h[k] = {} }
       @owners = Set.new
-      @teams = []
+      @teams = {}
     end
 
     def office
       return @office if @office
       scraper = Scraper::Office.new(leagueId: @id)
+      scraper.each_team do |team_scraper|
+        team = Team.new(team_scraper.id, team_scraper.name, team_scraper.owner)
+        @teams[team.id] = team
+      end
       @office = Office.new(scraper.name, scraper.founded, scraper.season, scraper.week )
+    end
+
+    def owners
+      weeks
+      @owners
+    end
+
+    def teams
+      office
+      @teams.values
+    end
+
+    def team(id)
+      office
+      @teams[id]
     end
 
     def weeks
@@ -50,11 +69,12 @@ module ESPN
         matchup = Matchup.new
         Matchup.members.each do |side|
           lineup = Lineup.new
-          lineup.team = matchup_scraper.team_id(side)
+          lineup.team_id = matchup_scraper.team_id(side)
           lineup.team_name = matchup_scraper.team_name(side)
+          lineup.owner = matchup_scraper.owner(side)
           lineup.score = matchup_scraper.score(side)
           matchup.send("#{side}=", lineup)
-          @owners << matchup_scraper.owner_name(side)
+          @owners << lineup.owner
         end
         determine_result(matchup.away, matchup.home)
         matchups << matchup
@@ -84,6 +104,7 @@ module ESPN
 
   module Scraper
     class Base
+      include Scraper
       @@url = 'http://games.espn.com/'
 
       def initialize(params = {})
@@ -131,6 +152,12 @@ module ESPN
       def founded
         @page.search('#seasonHistoryMenu option').last['value'].to_i
       end
+
+      def each_team
+        @page.at('h1:contains("Standings")').next.search("a").each do |team_link|
+          yield(Scraper::Team.new(team_link))
+        end
+      end
     end
 
     class Scoreboard < Base
@@ -150,8 +177,9 @@ module ESPN
     end
 
     class Partial
-      def initialize(page)
-        @page = page
+      include Scraper
+      def initialize(element)
+        @element = element
       end
     end
 
@@ -159,8 +187,7 @@ module ESPN
       @@sides = [:away, :home]
 
       def team_id(side)
-        id = /teamscrg_(\d+)_activeteamrow/
-          .match(team_row(side)['id'])[1].to_i
+        id = /_(\d+)_/.match(team_row(side)['id'])[1].to_i
         translate_team_id(id)
       end
 
@@ -168,7 +195,7 @@ module ESPN
         team_row(side).at('.name a').text
       end
 
-      def owner_name(side)
+      def owner(side)
         team_row(side).at('.owners').text
       end
 
@@ -183,18 +210,37 @@ module ESPN
       end
 
       def team_row(side)
-        @page.search('tr')[index(side)]
+        @element.search('tr')[index(side)]
+      end
+    end
+
+    class Team < Partial
+      def id
+        id = /teamId=(\d+)/.match(@element['href'])[1].to_i
+        translate_team_id(id)
+      end
+
+      def name
+        match_title[1]
+      end
+
+      def owner
+        match_title[2]
       end
 
       private
 
-      def translate_team_id(found)
-        mapping = {
-          8 => 13
-        }
-
-        mapping[found] || found
+      def match_title
+        /(.+) \((.+)\)/.match(@element['title'])
       end
+    end
+
+    def translate_team_id(found)
+      mapping = {
+        8 => 13
+      }
+
+      mapping[found] || found
     end
   end
 end
