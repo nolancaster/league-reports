@@ -21,7 +21,7 @@ module ESPN
         team = Team.new(team_scraper.id, team_scraper.name, team_scraper.owner)
         @teams[team.id] = team
       end
-      @office = Office.new(scraper.name, scraper.founded, scraper.season, scraper.week )
+      @office = Office.new(scraper.name, scraper.founded, scraper.season, scraper.week)
     end
 
     def owners
