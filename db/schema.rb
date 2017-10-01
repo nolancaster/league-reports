@@ -15,18 +15,6 @@ ActiveRecord::Schema.define(version: 20170915232625) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "games", force: :cascade do |t|
-    t.integer "season"
-    t.integer "week"
-    t.integer "type"
-    t.bigint "away_id"
-    t.bigint "home_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["away_id"], name: "index_games_on_away_id"
-    t.index ["home_id"], name: "index_games_on_home_id"
-  end
-
   create_table "leagues", force: :cascade do |t|
     t.string "name"
     t.string "url"
@@ -46,6 +34,18 @@ ActiveRecord::Schema.define(version: 20170915232625) do
     t.datetime "updated_at", null: false
     t.index ["owner_id"], name: "index_lineups_on_owner_id"
     t.index ["team_id"], name: "index_lineups_on_team_id"
+  end
+
+  create_table "matchups", force: :cascade do |t|
+    t.integer "season"
+    t.integer "week"
+    t.integer "type"
+    t.bigint "away_id"
+    t.bigint "home_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["away_id"], name: "index_matchups_on_away_id"
+    t.index ["home_id"], name: "index_matchups_on_home_id"
   end
 
   create_table "owners", force: :cascade do |t|

@@ -1,6 +1,6 @@
-class CreateGames < ActiveRecord::Migration[5.1]
+class CreateMatchups < ActiveRecord::Migration[5.1]
   def change
-    create_table :games do |t|
+    create_table :matchups do |t|
       t.integer :season
       t.integer :week
       t.integer :type
